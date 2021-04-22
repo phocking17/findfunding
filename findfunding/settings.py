@@ -26,7 +26,7 @@ SECRET_KEY = '$x2dk=hd(-s4@%@!f#q)hxi3%xr2l(woafcil8(7ypff$ys!7l'
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['find-funding.herokuapp.com']
 
 
 # Application definition
