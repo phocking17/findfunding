@@ -41,9 +41,17 @@
 		<div style="width: 50%">
 			<h1 class="org-title">{{ organization.name }}</h1>
 			<div class = "org-contact">
-				<h1 class="org-detail">{{ organization.city }}, {{ organization.state }}</h1>
+				{% if affiliations %}
+				<p>Associated Organization: 
+				{% for org in affiliations %}
+				<a href="../../organization/{{ org.name }}">{{ org.name }}</a>
+				{% endfor %}
+				{% endif %}
+				</p>	
+				<h1 class="org-detail">{{ organization.city }},{{ organization.state }}</h1>
 				<p class="break"></p>
-				<p>Website: <a href="{{ organization.website }}" target="_blank">{{ organization.website }}</a></p>
+				<p>Date: {{ organization.dates }}</p>
+				<p>Website: <a href="{{ organization.website }}" target="_blank">{{ organization.program_link }}</a></p>
 				<a href="{{ organization.website }}" target="_blank"><i class="fas fa-compass"></i></a>
 			</div>
 		</div>
@@ -52,6 +60,21 @@
 		<p style="font-weight: bold; color:#fff">About {{ organization.name }}</p>
 		<p style="color:#fff">{{ organization.description }}</p>
 	</div>
+
+{% if awards %}
+	<div class = "org-cperson">
+		<div class="image-box-person">
+			<img src="../../{{ organization.contact_image }}" class="org-image">
+		</div>
+		{% for award in awards %}
+			<div class="contact">
+
+				<p style="font-weight: bold; font-size: 35px">Award Name: {{ award.name }}</p>
+				<p class="org-detail">Amount: ${{ award.amount }}</p>
+			</div>
+		{% endfor %}
+	</div>
+{% endif %}
 
 
 {% if contact %}
@@ -67,27 +90,13 @@
 	</div>
 {% endif %}
 
-{% for pro in programs %}
-	<div class = "org-cperson">
-		<div class="image-box-person">
-			<img src="../../{{ organization.contact_image }}" class="org-image">
-		</div>
-		<div class="contact">
-
-			<p style="font-weight: bold; font-size: 35px">Program Name: {{ pro.name }}</p>
-			<p class="org-detail">Date: {{ pro.dates }}</p>
-			<p><a href="../../program/{{ pro.name }}">See Program</a></p>
-		</div>
-	</div>
-{% endfor %}
 
 	<div class = "org-tags">
-		<h3>See Related Organizations:</h3>
+		<h3>See Other Resources Related to:</h3>
 		{% for tag in overall_tags %}
 		<a href="../../results/{{ tag }}" class="org-button"><p style="color:#fff">{{ tag }}</p></a>
 		{% endfor %}
 	</div>
-
 </div>
 </body>
 </html>

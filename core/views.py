@@ -5,7 +5,7 @@ from django.http import HttpResponse
 from django.template import loader
 import random
 from .forms import *
-from .models import Tag, Tag_Type, Arching_Tag, Organization, Response, Quote
+from .models import *
 
 
 
@@ -47,13 +47,11 @@ def aboutme(request, instance=None):
 
 				question = tag_obj.question
 				choices = Tag.objects.filter(tag_type__name=tag)
-				color = tag_obj.color
 
 				template=loader.get_template('core/aboutme.html')
 				context={
 					'question':question,
 					'choices':choices,
-					'color':color,
 					'pkid' : r.id,
 					'metatag' : tag
 					}
@@ -67,14 +65,17 @@ def quickfind(request):
 	template=loader.get_template('core/quickfind.html')
 	context={
 		'tags' : [[tags, Tag.objects.filter(tag_type=tags)] for tags in Tag_Type.objects.all()],
-		'arching_tag': Arching_Tag.objects.all(),
+		'arching_tag': Technology_Tag.objects.all(),
 		}
 	return HttpResponse(template.render(context, request))
 
 def results_general(request, arching_name):
 	template=loader.get_template('core/results.html')
+	org_list = [[org] for org in Program.objects.filter(technology_tags__name=arching_name)]
+	if org_list == []:
+		org_list =  [[org] for org in Program.objects.filter(affiliations__name=arching_name)]
 	context={
-		'org_list': [[org] for org in Organization.objects.filter(overall_tags__name=arching_name)],
+		'org_list': org_list,
 		'tag':arching_name
 	}
 	return HttpResponse(template.render(context, request))
@@ -82,7 +83,7 @@ def results_general(request, arching_name):
 def results_tagspecific(request, tag_name,semi_name):
 	template=loader.get_template('core/results.html')
 	context={
-		'org_list': [[org] for org in Organization.objects.filter(tags__name=tag_name)],
+		'org_list': [[org] for org in Program.objects.filter(focus__name=tag_name)],
 		'tag':tag_name,
 		'seminame':semi_name
 	}
@@ -94,7 +95,7 @@ def results(request, instance):
 	r=Response.objects.get(pk=instance)
 	tags = r.tags_selected.all()
 	overall_tags = r.overall_tags_selected.all()
-	orgs = Organization.objects.all()
+	orgs = Program.objects.all()
 
 ###################################################################
 ### Matching Algorithm
@@ -103,19 +104,19 @@ def results(request, instance):
 		score = 0
 		division = 0
 		for tag in list(tags):
-			if tag in list(org.tags.all()):
+			if tag in list(org.focus.all()):
 				score+=1
 				division+=1
 			else:
 				division+=1
 		for otag in list(overall_tags):
-			if otag in org.overall_tags:
+			if otag in org.technology_tags:
 				score+=1
 				division+=1
 			else:
 				division+=1
 		fin_score = (score/division)*100
-		score_dict[org]=fin_score
+		score_dict[org]=round(fin_score, 2)
 
 	sorted_keys = sorted(score_dict, key=score_dict.get)  # [1, 3, 2]
 
@@ -138,12 +139,43 @@ def results(request, instance):
 	}
 	return HttpResponse(template.render(context, request))
 
+
+
+def all_opportunities(request):
+	template=loader.get_template('core/results.html')
+	context={
+		'org_list':[[org] for org in Program.objects.all()],
+		'all':True,
+	}
+	return HttpResponse(template.render(context, request))
+
+def program(request, pro_name):
+	template=loader.get_template('core/program.html')
+	pro=Program.objects.get(name=pro_name)
+	related_list = [tag.name for tag in pro.technology_tags.all()]
+	for org in pro.affiliations.all():
+		related_list.append(org)
+	context={
+		'organization' : pro,
+		'affiliations' : pro.affiliations.all(),
+		'contact': pro.contact.all(),
+		'awards': Award.objects.filter(program=pro),
+		'overall_tags' : related_list
+	}
+	return HttpResponse(template.render(context, request))
+
 def organization(request, org_name):
 	template=loader.get_template('core/organization.html')
 	org=Organization.objects.get(name=org_name)
+	try:
+		affiliations = [tag.name for tag in org.affiliations.all()]
+	except:
+		affiliations = None
 	context={
 		'organization' : org,
-		'overall_tags' : [tag.name for tag in org.overall_tags.all()]
+		'contact': org.contact.all(),
+		'overall_tags' : affiliations,
+		'programs' : Program.objects.filter(affiliations=org)
 	}
 	return HttpResponse(template.render(context, request))
 

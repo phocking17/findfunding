@@ -14,7 +14,7 @@
 	</div>
 		<a href="../../aboutme" class="navtab" style="grid-column:3">Match</a>
 		<a href="../../quickfind" class="navtab" style="grid-column:4">Categories</a>
-		<a href="../../forpartners" class="navtab" style="grid-column:5">All Programs</a>
+		<a href="../../all" class="navtab" style="grid-column:5">All Programs</a>
 </div>
 
 
@@ -28,6 +28,9 @@
 {% endif %}
 {% if customcheck %}
 <h4 class="result-title">Resources for You</h4>
+{% endif %}
+{% if all %}
+<h4 class="result-title">All Opportunities</h4>
 {% endif %}
 </div>
 
@@ -53,7 +56,7 @@
 	</div>
 	{% endif %}
 
-	<a class="cta-button" href="../../organization/{{ org.0.name}}">
+	<a class="cta-button" href="../../program/{{ org.0.name}}">
 		<h3 style="margin:5%">Learn More</h3>
 	</a>
 </div>
